@@ -151,8 +151,9 @@ export class AuthService {
         id: usuario.id,
         nombre_completo: usuario.nombre_completo,
         email: usuario.email,
-        rol: usuario.rol_usuario,
-        estado: usuario.estado_usuario,
+        telefono: usuario.telefono,
+        rol_usuario: usuario.rol_usuario,
+        estado_usuario: usuario.estado_usuario,
       },
     };
   }
@@ -173,7 +174,7 @@ export class AuthService {
   async registerAndLogin(createUsuarioDto: CreateUsuarioDto) {
     try {
       // 1. Registrar el usuario (se guarda en DB)
-      await this.usuarioService.create(createUsuarioDto);
+      const newUser = await this.usuarioService.create(createUsuarioDto);
 
       // 2. Generar un DTO de login con los mismos datos
       const loginDtoForNewUser: LoginUsuarioDto = {
@@ -182,7 +183,20 @@ export class AuthService {
       };
 
       // 3. Reusar login para devolver token + usuario
-      return await this.login(loginDtoForNewUser);
+      const loginResult = await this.login(loginDtoForNewUser);
+
+      // 4. Devolver el usuario creado con el token
+      return {
+        access_token: loginResult.access_token,
+        usuario: {
+          id: newUser.id,
+          nombre_completo: newUser.nombre_completo,
+          email: newUser.email,
+          telefono: newUser.telefono,
+          rol_usuario: newUser.rol_usuario,
+          estado_usuario: newUser.estado_usuario,
+        },
+      };
     } catch (error) {
       if (error instanceof ConflictException) {
         throw new BadRequestException('El email ya está registrado.');

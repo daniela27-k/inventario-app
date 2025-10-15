@@ -47,11 +47,7 @@ export class UsuarioService{
       .where('usuario.email = :email', { email })
       .getOne();
 
-    if (!usuario) {
-      throw new NotFoundException(`Usuario con email ${email} no encontrado.`);
-    }
-
-    return usuario;
+    return usuario; // Retorna null si no encuentra el usuario, no lanza excepción
   }
 
  async findAll(): Promise<Usuario[]> { 

@@ -18,12 +18,12 @@ import { EstadoElemento } from './estado-elemento/estado-elemento.entity';
 import { AsignacionElemento } from './asignacion-elemento/asignacion-elemento.entity';
 
 //funcion de ayuda para obtener variables de entorno
-function getEnv(key: string): string {
-  const value= process.env[key];
-  if (value===undefined){
+function getEnv(key: string, defaultValue?: string): string {
+  const value = process.env[key];
+  if (value === undefined && defaultValue === undefined) {
     throw new Error(`La variable de entorno ${key} no está definida`);
   }
-  return value; 
+  return value || defaultValue || '';
 }
 
 
@@ -33,14 +33,16 @@ function getEnv(key: string): string {
       isGlobal: true,
       envFilePath: '.env',
     }), //hace que.env este disponible en toda la app
+
+    
     TypeOrmModule.forRoot({
-      type: 'mysql',
+     type: 'mysql',
       host: getEnv('DB_HOST'),
       port: parseInt(getEnv('DB_PORT') || '3306', 10),
       username:getEnv('DB_USERNAME'),
       password:getEnv('DB_PASSWORD'),
       database:getEnv('DB_NAME'),
-      entities:[
+      entities: [
         Ambiente,
         Usuario,
         Inventario,
@@ -48,9 +50,9 @@ function getEnv(key: string): string {
         EstadoElemento,
         AsignacionElemento
       ],
-      // synchronize: process.env.NODE_ENV !== 'production', //sincroniza la bd solo en desarrollo
-      logging: process.env.NODE_ENV !== 'production', //habilita el log de queries en desarrollo
-      //softdelete: true, //habilita el borrado logico
+      synchronize: true, // siempre sincronizar en desarrollo
+      logging: true, // siempre loggear en desarrollo
+      dropSchema: false, // no eliminar esquema existente
     }),
 
     AsignacionElementoModule,

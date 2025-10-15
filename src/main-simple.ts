@@ -1,10 +1,10 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
+import { AppSimpleModule } from './app-simple.module';
 import cookieParser from 'cookie-parser';
 
-
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppSimpleModule);
+  
   app.enableCors({
     origin: process.env.NODE_ENV === 'production'
       ? process.env.FRONTEND_URL || 'http://localhost:3000'
@@ -14,10 +14,10 @@ async function bootstrap() {
 
   app.use(cookieParser());
 
-
   await app.listen(3001);
+  console.log('Servidor simple corriendo en http://localhost:3001');
 }
-// Manejo seguro de promesa
+
 bootstrap().catch((err) => {
   console.error('Error al iniciar la app:', err);
 });

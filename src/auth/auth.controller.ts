@@ -14,7 +14,7 @@ import type { Response, Request } from 'express';
 import { AuthService } from './auth.service';
 import { LoginUsuarioDto } from './dto/login-usuario.dto';
 import { CreateUsuarioDto } from '../usuario/dto/create-usuario.dto';
-import { AuthGuard } from '@nestjs/passport';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -46,6 +46,7 @@ export class AuthController {
     @Body() loginUsuarioDto: LoginUsuarioDto,
     @Res({ passthrough: true }) res: Response,
   ) {
+    console.log(loginUsuarioDto)
     const { access_token, usuario } = await this.authService.login(loginUsuarioDto);
 
     res.cookie('access_token', access_token, {
@@ -71,9 +72,9 @@ export class AuthController {
     return { message: 'Sesión cerrada correctamente' };
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Get('profile')
-  profile(@Req() req: Request & { user?: User }) {
+  profile(@Req() req: Request & { user?: any }) {
     return req.user;
   }
 }

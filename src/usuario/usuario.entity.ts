@@ -47,7 +47,7 @@ export class Usuario {
 
   // USO DEL ENUM PARA EL ROL
   @Column({
-    type: 'enum',
+    type: 'simple-enum',
     enum: rolUsuario,
     default: rolUsuario.USUARIO,
     nullable: false,
@@ -56,12 +56,12 @@ export class Usuario {
 
   // USO DEL ENUM PARA EL ESTADO
   @Column({
-    type: 'varchar',
-    length: 255,
+    type: 'simple-enum',
+    enum: estadoUsuario,
     default: estadoUsuario.ACTIVO,
     nullable: false,
   })
-  estado_usuario: string;
+  estado_usuario: estadoUsuario;
 
   @CreateDateColumn({ name: 'created_at' })
   created_at: Date;

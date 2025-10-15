@@ -15,7 +15,7 @@ export class Ambiente {
   @Column({ length: 255 })
   ubicacion: string;
 
-  @Column({ type: 'enum', enum: ['activo', 'inactivo', 'mantenimiento'] })
+  @Column({ type: 'simple-enum', enum: ['activo', 'inactivo', 'mantenimiento'] })
   estado: string;
 
   @OneToMany(() => Inventario, (inventario) => inventario.ambiente)
