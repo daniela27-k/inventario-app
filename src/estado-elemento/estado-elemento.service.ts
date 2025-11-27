@@ -4,7 +4,7 @@
 // export class EstadoElementoService {}
 
 // estado-elemento.service.ts
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, OnModuleInit, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { EstadoElemento } from './estado-elemento.entity';
@@ -12,11 +12,40 @@ import { CreateEstadoElementoDto } from './dto/create-estado-elemento.dto';
 import { UpdateEstadoElementoDto } from './dto/update-estado-elemento.dto';
 
 @Injectable()
-export class EstadoElementoService {
+export class EstadoElementoService implements OnModuleInit {
+  private readonly logger = new Logger(EstadoElementoService.name);
+
   constructor(
     @InjectRepository(EstadoElemento)
     private estadoElementoRepository: Repository<EstadoElemento>,
   ) {}
+
+  async onModuleInit() {
+    await this.seedEstados();
+  }
+
+  private async seedEstados() {
+    const estadosRequeridos = [
+      { nombre_estado: 'Dado de baja', descripcion: 'Elemento retirado del inventario', color_codigo: '#DC3545' },
+      { nombre_estado: 'En mantenimiento', descripcion: 'Elemento en reparación o revisión', color_codigo: '#FFC107' },
+      { nombre_estado: 'En uso', descripcion: 'Elemento asignado y en uso', color_codigo: '#28A745' },
+    ];
+
+    for (const estado of estadosRequeridos) {
+      const existing = await this.estadoElementoRepository.findOne({
+        where: { nombre_estado: estado.nombre_estado }
+      });
+
+      if (!existing) {
+        this.logger.log(`Seeding estado: ${estado.nombre_estado}`);
+        try {
+            await this.estadoElementoRepository.save(this.estadoElementoRepository.create(estado));
+        } catch (error) {
+            this.logger.warn(`Could not seed estado ${estado.nombre_estado}: ${error.message}`);
+        }
+      }
+    }
+  }
 
   async create(createEstadoElementoDto: CreateEstadoElementoDto): Promise<EstadoElemento> {
     // Verificar si ya existe un estado con el mismo nombre
