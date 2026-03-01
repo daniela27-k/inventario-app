@@ -26,7 +26,7 @@ function isAuthenticatedUser(obj: unknown): obj is AuthenticatedUser {
   }
 
   const candidate = obj as Record<string, unknown>;
-  
+
   return (
     typeof candidate.id === 'number' &&
     candidate.id > 0 &&
@@ -39,7 +39,7 @@ function isAuthenticatedUser(obj: unknown): obj is AuthenticatedUser {
 
 @Injectable()
 export class UltraSafeRolesGuard implements CanActivate {
-  constructor(private readonly reflector: Reflector) {}
+  constructor(private readonly reflector: Reflector) { }
 
   canActivate(context: ExecutionContext): boolean {
     // 1. Obtener los roles requeridos del decorador @Roles()
@@ -57,8 +57,13 @@ export class UltraSafeRolesGuard implements CanActivate {
     const request = context.switchToHttp().getRequest<Request>();
     const userCandidate = request.user;
 
+    console.log('--- UltraSafeRolesGuard DEBUG ---');
+    console.log('Required Roles:', requiredRoles);
+    console.log('User Candidate:', JSON.stringify(userCandidate, null, 2));
+
     // 3. Validar que el usuario existe y tiene la estructura correcta
     if (!isAuthenticatedUser(userCandidate)) {
+      console.log('IS_AUTHENTICATED_USER FAILED');
       throw new UnauthorizedException('Usuario no autenticado o inválido');
     }
 
@@ -67,7 +72,7 @@ export class UltraSafeRolesGuard implements CanActivate {
 
     // 4. Verificar si el rol del usuario está incluido en los roles requeridos
     const hasRequiredRole = this.checkUserRole(user.rolUsuario, requiredRoles);
-    
+
     if (!hasRequiredRole) {
       throw new UnauthorizedException(
         `Acceso denegado. Rol actual: ${user.rolUsuario}, Roles requeridos: ${requiredRoles.join(', ')}`
@@ -85,7 +90,7 @@ export class UltraSafeRolesGuard implements CanActivate {
 // Versión con logging para auditoría
 @Injectable()
 export class AuditableRolesGuard implements CanActivate {
-  constructor(private readonly reflector: Reflector) {}
+  constructor(private readonly reflector: Reflector) { }
 
   canActivate(context: ExecutionContext): boolean {
     const requiredRoles = this.reflector.getAllAndOverride<rolUsuario[]>(
@@ -107,8 +112,8 @@ export class AuditableRolesGuard implements CanActivate {
 
     const user: AuthenticatedUser = userCandidate;
     const hasRequiredRole = this.checkUserRole(user.rolUsuario, requiredRoles);
-    
-    this.logAccessAttempt(user, requiredRoles, hasRequiredRole, 
+
+    this.logAccessAttempt(user, requiredRoles, hasRequiredRole,
       hasRequiredRole ? 'Acceso permitido' : 'Rol insuficiente');
 
     if (!hasRequiredRole) {
@@ -125,14 +130,14 @@ export class AuditableRolesGuard implements CanActivate {
   }
 
   private logAccessAttempt(
-    user: AuthenticatedUser | null, 
-    requiredRoles: rolUsuario[], 
+    user: AuthenticatedUser | null,
+    requiredRoles: rolUsuario[],
     granted: boolean,
     reason: string
   ): void {
     const timestamp = new Date().toISOString();
     const userInfo = user ? `${user.username} (${user.rolUsuario})` : 'Unknown';
-    
+
     console.log(JSON.stringify({
       timestamp,
       user: userInfo,
@@ -156,7 +161,7 @@ export function createRoleGuard(...allowedRoles: rolUsuario[]) {
       }
 
       const user: AuthenticatedUser = userCandidate;
-      
+
       if (!allowedRoles.includes(user.rolUsuario)) {
         throw new UnauthorizedException(
           `Acceso denegado. Rol requerido: ${allowedRoles.join(' o ')}`

@@ -15,14 +15,17 @@ import {
   ParseIntPipe,
   HttpStatus,
   HttpCode,
+  UseGuards,
 } from '@nestjs/common';
 import { AmbienteService } from './ambiente.service';
 import { CreateAmbienteDto } from './dto/create-ambiente.dto';
 import { UpdateAmbienteDto } from './dto/update-ambiente.dto';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
+@UseGuards(JwtAuthGuard)
 @Controller('ambiente')
 export class AmbienteController {
-  constructor(private readonly ambienteService: AmbienteService) {}
+  constructor(private readonly ambienteService: AmbienteService) { }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)

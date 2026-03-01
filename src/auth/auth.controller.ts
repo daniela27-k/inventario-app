@@ -2,6 +2,7 @@
 import {
   Controller,
   Post,
+  Patch,
   Body,
   HttpCode,
   HttpStatus,
@@ -14,11 +15,16 @@ import type { Response, Request } from 'express';
 import { AuthService } from './auth.service';
 import { LoginUsuarioDto } from './dto/login-usuario.dto';
 import { CreateUsuarioDto } from '../usuario/dto/create-usuario.dto';
+import { UpdateUsuarioDto } from '../usuario/dto/update-usuario.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { UsuarioService } from '../usuario/usuario.service';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly usuarioService: UsuarioService,
+  ) { }
 
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
@@ -76,6 +82,23 @@ export class AuthController {
   @Get('profile')
   profile(@Req() req: Request & { user?: any }) {
     return req.user;
+  }
+
+  // ✅ Cualquier usuario autenticado puede actualizar su propio perfil
+  @UseGuards(JwtAuthGuard)
+  @Patch('profile')
+  @HttpCode(HttpStatus.OK)
+  async updateProfile(
+    @Req() req: Request & { user?: any },
+    @Body() updateUsuarioDto: UpdateUsuarioDto,
+  ) {
+    const userId = req.user?.id;
+    // Prevenir que el usuario cambie su propio rol o estado
+    delete updateUsuarioDto.rol_usuario;
+    delete updateUsuarioDto.estado_usuario;
+    const updated = await this.usuarioService.update(userId, updateUsuarioDto);
+    const { password: _, ...result } = updated as any;
+    return result;
   }
 }
 

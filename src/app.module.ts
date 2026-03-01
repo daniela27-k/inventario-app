@@ -1,6 +1,7 @@
+// last updated: 2026-02-26T13:10
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule} from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { UsuarioModule } from './usuario/usuario.module';
 import { AmbienteModule } from './ambiente/ambiente.module';
 import { InventarioModule } from './inventario/inventario.module';
@@ -8,6 +9,8 @@ import { TipoElementoModule } from './tipo-elemento/tipo-elemento.module';
 import { EstadoElementoModule } from './estado-elemento/estado-elemento.module';
 import { AsignacionElementoModule } from './asignacion-elemento/asignacion-elemento.module';
 import { AuthModule } from './auth/auth.module';
+import { NovedadModule } from './novedad/novedad.module';
+import { AsistenteModule } from './asistente/asistente.module';
 
 // entities
 import { Ambiente } from './ambiente/ambiente.entity';
@@ -16,6 +19,7 @@ import { Inventario } from './inventario/inventario.entity';
 import { TipoElemento } from './tipo-elemento/tipo-elemento.entity';
 import { EstadoElemento } from './estado-elemento/estado-elemento.entity';
 import { AsignacionElemento } from './asignacion-elemento/asignacion-elemento.entity';
+import { Novedad } from './novedad/novedad.entity';
 
 //funcion de ayuda para obtener variables de entorno
 function getEnv(key: string, defaultValue?: string): string {
@@ -34,21 +38,22 @@ function getEnv(key: string, defaultValue?: string): string {
       envFilePath: '.env',
     }), //hace que.env este disponible en toda la app
 
-    
+
     TypeOrmModule.forRoot({
-     type: 'mysql',
+      type: 'mysql',
       host: getEnv('DB_HOST'),
       port: parseInt(getEnv('DB_PORT') || '3306', 10),
-      username:getEnv('DB_USERNAME'),
-      password:getEnv('DB_PASSWORD'),
-      database:getEnv('DB_NAME'),
+      username: getEnv('DB_USERNAME'),
+      password: getEnv('DB_PASSWORD'),
+      database: getEnv('DB_NAME'),
       entities: [
         Ambiente,
         Usuario,
         Inventario,
         TipoElemento,
         EstadoElemento,
-        AsignacionElemento
+        AsignacionElemento,
+        Novedad,
       ],
       synchronize: true, // siempre sincronizar en desarrollo
       logging: true, // siempre loggear en desarrollo
@@ -62,8 +67,10 @@ function getEnv(key: string, defaultValue?: string): string {
     TipoElementoModule,
     EstadoElementoModule,
     AuthModule,
+    NovedadModule,
+    AsistenteModule,
   ],
   controllers: [],
   providers: [],
 })
-export class AppModule {}
+export class AppModule { }

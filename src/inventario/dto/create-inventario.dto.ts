@@ -70,6 +70,14 @@ export class CreateInventarioDto {
   @IsDateString({}, { message: 'La fecha de registro debe ser una fecha válida' })
   fecha_registro?: string;
 
+  @IsOptional()
+  @IsDateString({}, { message: 'La fecha de baja debe ser una fecha válida' })
+  fecha_baja?: string;
+
+  @IsOptional()
+  @IsString({ message: 'El motivo de baja debe ser texto' })
+  motivo_baja?: string;
+
   @IsNumber({}, { message: 'El ID del tipo de elemento debe ser un número' })
   id_tipo_elemento: number;
 

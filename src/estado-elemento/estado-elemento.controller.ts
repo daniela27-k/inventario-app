@@ -17,14 +17,17 @@ import {
   HttpStatus,
   HttpCode,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { EstadoElementoService } from './estado-elemento.service';
 import { CreateEstadoElementoDto } from './dto/create-estado-elemento.dto';
 import { UpdateEstadoElementoDto } from './dto/update-estado-elemento.dto';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
+@UseGuards(JwtAuthGuard)
 @Controller('estado-elemento')
 export class EstadoElementoController {
-  constructor(private readonly estadoElementoService: EstadoElementoService) {}
+  constructor(private readonly estadoElementoService: EstadoElementoService) { }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)

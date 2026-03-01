@@ -16,14 +16,17 @@ import {
   HttpStatus,
   HttpCode,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { AsignacionElementoService } from './asignacion-elemento.service';
 import { CreateAsignacionElementoDto } from './dto/create-asignacion-elemento.dto';
 import { UpdateAsignacionElementoDto } from './dto/update-asignacion-elemento.dto';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
+@UseGuards(JwtAuthGuard)
 @Controller('asignacion-elemento')
 export class AsignacionElementoController {
-  constructor(private readonly asignacionService: AsignacionElementoService) {}
+  constructor(private readonly asignacionService: AsignacionElementoService) { }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)

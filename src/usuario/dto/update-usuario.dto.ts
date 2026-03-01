@@ -2,19 +2,16 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { IsOptional, IsString, MinLength, IsEnum, IsEmail } from 'class-validator';
 import { CreateUsuarioDto } from './create-usuario.dto';
-import { rolUsuario, estadoUsuario} from '../usuario.entity'; // Importa los enum rolusuario y estadoUsuario
+import { rolUsuario, estadoUsuario } from '../usuario.entity';
 
 export class UpdateUsuarioDto extends PartialType(CreateUsuarioDto) {
-    // las propiedades aqui son opcionales porque partialtype ya las hace opcionales.
-    // sin embargo, podemos añadir validadores especificos o anular los existentes.
-
     @IsOptional()
     @IsString()
     nombre_completo?: string;
 
-   @IsOptional()
-   @IsEmail()
-   email?: string;
+    @IsOptional()
+    @IsEmail()
+    email?: string;
 
     @IsOptional()
     @IsString()
@@ -25,13 +22,13 @@ export class UpdateUsuarioDto extends PartialType(CreateUsuarioDto) {
     @IsString()
     telefono?: string;
 
+    // Campo correcto según la entidad
     @IsOptional()
-    @IsEnum(rolUsuario, {message: `El rol debe ser uno de los siguientes: ${Object.values(rolUsuario).join(', ')}`})
-    rol?: rolUsuario;
+    @IsEnum(rolUsuario, { message: `El rol debe ser uno de: ${Object.values(rolUsuario).join(', ')}` })
+    rol_usuario?: rolUsuario;
 
+    // Campo correcto según la entidad
     @IsOptional()
-    @IsEnum(estadoUsuario, {message: `El estado debe ser uno de los siguientes: ${Object.values(estadoUsuario).join(', ')}`})
-    estado?: estadoUsuario;
-    
+    @IsEnum(estadoUsuario, { message: `El estado debe ser uno de: ${Object.values(estadoUsuario).join(', ')}` })
+    estado_usuario?: estadoUsuario;
 }
- 

@@ -88,6 +88,13 @@ export class Inventario {
   @Column({ type: 'date' })
   fecha_registro: Date;
 
+  // Columnas de baja
+  @Column({ type: 'date', nullable: true })
+  fecha_baja: Date | null;
+
+  @Column({ type: 'text', nullable: true })
+  motivo_baja: string | null;
+
   // Columnas FK explícitas
   @Column()
   id_tipo_elemento: number;

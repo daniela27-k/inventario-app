@@ -136,7 +136,7 @@
 
 //   async getInventarioStats(): Promise<any> {
 //     const total = await this.inventarioRepository.count();
-    
+
 //     const porTipo = await this.inventarioRepository
 //       .createQueryBuilder('inventario')
 //       .leftJoin('inventario.tipoElemento', 'tipo')
@@ -229,7 +229,7 @@
 
 //   async cambiarEstado(id: number, id_estado_elemento: number): Promise<Inventario> {
 //     const inventario = await this.findOne(id);
-    
+
 //     // Verificar que el estado exista
 //     const estado = await this.estadoElementoRepository.findOne({
 //       where: { id_estado_elemento },
@@ -245,7 +245,7 @@
 
 //   async cambiarUbicacion(id: number, id_ambiente: number): Promise<Inventario> {
 //     const inventario = await this.findOne(id);
-    
+
 //     // Verificar que el ambiente exista
 //     const ambiente = await this.ambienteRepository.findOne({
 //       where: { id_ambiente },
@@ -318,7 +318,7 @@ export class InventarioService {
     private estadoElementoRepository: Repository<EstadoElemento>,
     @InjectRepository(Ambiente)
     private ambienteRepository: Repository<Ambiente>,
-  ) {}
+  ) { }
 
   async create(createInventarioDto: CreateInventarioDto): Promise<Inventario> {
     // Verificar que el número serial sea único
@@ -429,7 +429,7 @@ export class InventarioService {
 
   async getInventarioStats(): Promise<any> {
     const total = await this.inventarioRepository.count();
-    
+
     const porTipo = await this.inventarioRepository
       .createQueryBuilder('inventario')
       .leftJoin('inventario.tipoElemento', 'tipo')
@@ -463,8 +463,8 @@ export class InventarioService {
     const inventario = await this.findOne(id);
 
     // Verificar número serial único (si se está actualizando)
-    if (updateInventarioDto.numero_serial && 
-        updateInventarioDto.numero_serial !== inventario.numero_serial) {
+    if (updateInventarioDto.numero_serial &&
+      updateInventarioDto.numero_serial !== inventario.numero_serial) {
       const existingSerial = await this.inventarioRepository.findOne({
         where: { numero_serial: updateInventarioDto.numero_serial },
       });
@@ -475,9 +475,9 @@ export class InventarioService {
     }
 
     // Verificar entidades relacionadas si se están actualizando
-    if (updateInventarioDto.id_tipo_elemento || 
-        updateInventarioDto.id_estado_elemento || 
-        updateInventarioDto.id_ambiente) {
+    if (updateInventarioDto.id_tipo_elemento ||
+      updateInventarioDto.id_estado_elemento ||
+      updateInventarioDto.id_ambiente) {
       await this.validateRelatedEntities(
         updateInventarioDto.id_tipo_elemento || inventario.id_tipo_elemento,
         updateInventarioDto.id_estado_elemento || inventario.id_estado_elemento,
@@ -516,13 +516,21 @@ export class InventarioService {
     if (updateInventarioDto.id_ambiente !== undefined) {
       inventario.id_ambiente = updateInventarioDto.id_ambiente;
     }
+    if (updateInventarioDto.fecha_baja !== undefined) {
+      inventario.fecha_baja = updateInventarioDto.fecha_baja
+        ? new Date(updateInventarioDto.fecha_baja)
+        : null;
+    }
+    if (updateInventarioDto.motivo_baja !== undefined) {
+      inventario.motivo_baja = updateInventarioDto.motivo_baja || null;
+    }
 
     return await this.inventarioRepository.save(inventario);
   }
 
   async cambiarEstado(id: number, id_estado_elemento: number): Promise<Inventario> {
     const inventario = await this.findOne(id);
-    
+
     // Verificar que el estado exista
     const estado = await this.estadoElementoRepository.findOne({
       where: { id_estado_elemento },
@@ -538,7 +546,7 @@ export class InventarioService {
 
   async cambiarUbicacion(id: number, id_ambiente: number): Promise<Inventario> {
     const inventario = await this.findOne(id);
-    
+
     // Verificar que el ambiente exista
     const ambiente = await this.ambienteRepository.findOne({
       where: { id_ambiente },
