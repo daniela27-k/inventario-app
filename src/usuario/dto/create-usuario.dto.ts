@@ -1,4 +1,4 @@
-//ejemplo para create.usuario.dto.ts
+// src/usuario/dto/create-usuario.dto.ts
 import {
   IsString,
   IsNotEmpty,
@@ -8,6 +8,7 @@ import {
   MinLength,
 } from 'class-validator';
 import { rolUsuario, estadoUsuario } from '../usuario.entity';
+
 export class CreateUsuarioDto {
   @IsNotEmpty()
   @IsString()
@@ -19,7 +20,7 @@ export class CreateUsuarioDto {
 
   @IsNotEmpty()
   @IsString()
-  @MinLength(6)
+  @MinLength(6, { message: 'La contraseña debe tener al menos 6 caracteres' })
   password: string;
 
   @IsNotEmpty()
@@ -27,10 +28,10 @@ export class CreateUsuarioDto {
   telefono: string;
 
   @IsOptional()
-  @IsEnum(rolUsuario)
-  rol?: rolUsuario;
+  @IsEnum(rolUsuario, { message: `El rol debe ser uno de: ${Object.values(rolUsuario).join(', ')}` })
+  rol_usuario?: rolUsuario;
 
   @IsOptional()
-  @IsEnum(estadoUsuario)
-  estado?: estadoUsuario;
+  @IsEnum(estadoUsuario, { message: `El estado debe ser uno de: ${Object.values(estadoUsuario).join(', ')}` })
+  estado_usuario?: estadoUsuario;
 }
