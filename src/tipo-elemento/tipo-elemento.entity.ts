@@ -12,8 +12,14 @@ export class TipoElemento {
   @Column('text')
   descripcion: string;
 
+  @Column({ length: 255, nullable: true })
+  marca: string;
+
   @Column({ type: 'enum', enum: ['activo', 'inactivo'] })
   estado: string;
+
+  @Column({ length: 255, nullable: true })
+  numero_serial: string;
 
   @OneToMany(() => Inventario, (inventario) => inventario.tipoElemento)
   inventarios: Inventario[];

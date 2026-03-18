@@ -1,15 +1,9 @@
-// import { Injectable } from '@nestjs/common';
-
-// @Injectable()
-// export class TipoElementoService {}
-
-
-
 // tipo-elemento.service.ts
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { TipoElemento } from './tipo-elemento.entity';
+import { Inventario } from '../inventario/inventario.entity';
 import { CreateTipoElementoDto } from './dto/create-tipo-elemento.dto';
 import { UpdateTipoElementoDto } from './dto/update-tipo-elemento.dto';
 
@@ -18,10 +12,11 @@ export class TipoElementoService {
   constructor(
     @InjectRepository(TipoElemento)
     private tipoElementoRepository: Repository<TipoElemento>,
-  ) {}
+    @InjectRepository(Inventario)
+    private inventarioRepository: Repository<Inventario>,
+  ) { }
 
   async create(createTipoElementoDto: CreateTipoElementoDto): Promise<TipoElemento> {
-    // Verificar si ya existe un tipo con el mismo nombre
     const existingTipo = await this.tipoElementoRepository.findOne({
       where: { nombre_tipo: createTipoElementoDto.nombre_tipo },
     });
@@ -33,10 +28,27 @@ export class TipoElementoService {
     const tipoElemento = this.tipoElementoRepository.create({
       nombre_tipo: createTipoElementoDto.nombre_tipo,
       descripcion: createTipoElementoDto.descripcion || '',
+      marca: createTipoElementoDto.marca || '',
       estado: createTipoElementoDto.estado,
+      numero_serial: createTipoElementoDto.numero_serial || null,
     });
 
-    return await this.tipoElementoRepository.save(tipoElemento);
+    const savedTipo = await this.tipoElementoRepository.save(tipoElemento);
+
+    if (createTipoElementoDto.numero_serial?.trim()) {
+      const inventario = this.inventarioRepository.create({
+        nombre: createTipoElementoDto.nombre_tipo,
+        numero_serial: createTipoElementoDto.numero_serial.trim(),
+        marca: createTipoElementoDto.marca || '',
+        modelo: createTipoElementoDto.modelo || null,
+        id_tipo_elemento: savedTipo.id_tipo_elemento,
+        id_estado_elemento: 7,
+        id_ambiente: 1,
+      });
+      await this.inventarioRepository.save(inventario);
+    }
+
+    return savedTipo;
   }
 
   async findAll(): Promise<TipoElemento[]> {
@@ -84,6 +96,7 @@ export class TipoElementoService {
         'tipo.id_tipo_elemento',
         'tipo.nombre_tipo',
         'tipo.descripcion',
+        'tipo.marca',
         'tipo.estado',
         'COUNT(inventario.id_inventario) as total_elementos'
       ])
@@ -95,9 +108,8 @@ export class TipoElementoService {
   async update(id: number, updateTipoElementoDto: UpdateTipoElementoDto): Promise<TipoElemento> {
     const tipoElemento = await this.findOne(id);
 
-    // Verificar conflictos de nombre (si se está actualizando)
-    if (updateTipoElementoDto.nombre_tipo && 
-        updateTipoElementoDto.nombre_tipo !== tipoElemento.nombre_tipo) {
+    if (updateTipoElementoDto.nombre_tipo &&
+      updateTipoElementoDto.nombre_tipo !== tipoElemento.nombre_tipo) {
       const existingNombre = await this.tipoElementoRepository.findOne({
         where: { nombre_tipo: updateTipoElementoDto.nombre_tipo },
       });
@@ -107,16 +119,10 @@ export class TipoElementoService {
       }
     }
 
-    // Aplicar actualizaciones
-    if (updateTipoElementoDto.nombre_tipo !== undefined) {
-      tipoElemento.nombre_tipo = updateTipoElementoDto.nombre_tipo;
-    }
-    if (updateTipoElementoDto.descripcion !== undefined) {
-      tipoElemento.descripcion = updateTipoElementoDto.descripcion;
-    }
-    if (updateTipoElementoDto.estado !== undefined) {
-      tipoElemento.estado = updateTipoElementoDto.estado;
-    }
+    if (updateTipoElementoDto.nombre_tipo !== undefined) tipoElemento.nombre_tipo = updateTipoElementoDto.nombre_tipo;
+    if (updateTipoElementoDto.descripcion !== undefined) tipoElemento.descripcion = updateTipoElementoDto.descripcion;
+    if (updateTipoElementoDto.marca !== undefined) tipoElemento.marca = updateTipoElementoDto.marca;
+    if (updateTipoElementoDto.estado !== undefined) tipoElemento.estado = updateTipoElementoDto.estado;
 
     return await this.tipoElementoRepository.save(tipoElemento);
   }
@@ -136,7 +142,6 @@ export class TipoElementoService {
   async remove(id: number): Promise<void> {
     const tipoElemento = await this.findOne(id);
 
-    // Verificar si el tipo tiene elementos asociados
     if (tipoElemento.inventarios && tipoElemento.inventarios.length > 0) {
       throw new ConflictException(
         `No se puede eliminar el tipo "${tipoElemento.nombre_tipo}" porque tiene ${tipoElemento.inventarios.length} elemento(s) asociado(s)`
@@ -148,12 +153,8 @@ export class TipoElementoService {
 
   async getEstadisticasUso(): Promise<any> {
     const totalTipos = await this.tipoElementoRepository.count();
-    const tiposActivos = await this.tipoElementoRepository.count({
-      where: { estado: 'activo' }
-    });
-    const tiposInactivos = await this.tipoElementoRepository.count({
-      where: { estado: 'inactivo' }
-    });
+    const tiposActivos = await this.tipoElementoRepository.count({ where: { estado: 'activo' } });
+    const tiposInactivos = await this.tipoElementoRepository.count({ where: { estado: 'inactivo' } });
 
     const tiposConElementos = await this.tipoElementoRepository
       .createQueryBuilder('tipo')

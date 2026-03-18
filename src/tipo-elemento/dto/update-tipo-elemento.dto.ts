@@ -13,6 +13,11 @@ export class UpdateTipoElementoDto {
   descripcion?: string;
 
   @IsOptional()
+  @IsString({ message: 'La marca debe ser una cadena de texto' })
+  @MaxLength(255, { message: 'La marca no puede exceder 255 caracteres' })
+  marca?: string;
+
+  @IsOptional()
   @IsEnum(['activo', 'inactivo'], {
     message: 'El estado debe ser: activo o inactivo'
   })

@@ -12,13 +12,12 @@ export class AsistenteService {
 
     private async initializeAI() {
         try {
-            // Intentar cargar la librería dinámicamente para evitar que el servidor se caiga si no está instalada
             const { GoogleGenerativeAI } = await import('@google/generative-ai');
             const apiKey = process.env.GEMINI_API_KEY;
 
             if (apiKey && apiKey !== 'tu_api_key_aqui_para_activar_la_ia') {
                 this.genAI = new GoogleGenerativeAI(apiKey);
-                this.model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+                this.model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash-8b' });
                 this.isAIReady = true;
                 console.log('✅ Asistente IVI: IA activada correctamente con Gemini.');
             } else {
@@ -26,12 +25,14 @@ export class AsistenteService {
             }
         } catch (error) {
             console.warn('⚠️ Asistente IVI: Librería de Google IA no encontrada. Ejecute: npm install @google/generative-ai');
+            console.error('Detalle error init:', JSON.stringify(error));
             this.isAIReady = false;
         }
     }
 
     async generarRespuesta(pregunta: string, contextoUsuario: any) {
-        // Si la IA no está lista o la carga falló, devolvemos null para que el frontend use su respaldo local
+        console.log('🤖 isAIReady:', this.isAIReady, '| model:', !!this.model);
+
         if (!this.isAIReady || !this.model) {
             return null;
         }
@@ -53,8 +54,8 @@ export class AsistenteService {
         - Recopilar info inicial para cotizaciones o soporte.
 
         REGLAS CRÍTICAS:
-        1. Solo responder temas de Invigex y tecnología relevante.
-        2. Si no sabes algo, di: "déjame conectarte con el equipo de Invigex para darte info exacta" y ofrece contacto (soporte@invigex.com).
+        1. Responde cualquier pregunta que haga el usuario, no solo temas de Invigex.
+        2. Si no sabes algo específico de Invigex, di: "déjame conectarte con el equipo de Invigex para darte info exacta" y ofrece contacto (soporte@invigex.com).
         3. No hables de la competencia.
         4. Prioriza empatía si el usuario está frustrado.
         5. Siempre termina con un siguiente paso claro.
@@ -70,8 +71,8 @@ export class AsistenteService {
             const response = await result.response;
             return response.text();
         } catch (error) {
-            console.error('Error en Gemini:', error);
-            return null; // El frontend detectará el null y usará su respaldo
+            console.error('Error en Gemini:', JSON.stringify(error));
+            return null;
         }
     }
 }

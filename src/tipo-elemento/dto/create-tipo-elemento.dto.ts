@@ -1,4 +1,4 @@
-import { IsEnum, IsNotEmpty, IsOptional } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreateTipoElementoDto {
   @IsNotEmpty()
@@ -7,6 +7,18 @@ export class CreateTipoElementoDto {
   @IsOptional()
   descripcion?: string;
 
+  @IsOptional()
+  @IsString()
+  marca?: string;
+
   @IsEnum(['activo', 'inactivo'])
   estado: string;
+
+  @IsOptional()
+  @IsString()
+  numero_serial?: string;
+
+  @IsOptional()
+  @IsString()
+  modelo?: string;
 }
