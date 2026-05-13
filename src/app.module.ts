@@ -30,19 +30,19 @@ function getEnv(key: string, defaultValue?: string): string {
   return value || defaultValue || '';
 }
 
+const isProduction = process.env.NODE_ENV === 'production';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
-    }), //hace que.env este disponible en toda la app
-
+    }),
 
     TypeOrmModule.forRoot({
-      type: 'mysql',
+      type: isProduction ? 'postgres' : 'mysql',
       host: getEnv('DB_HOST'),
-      port: parseInt(getEnv('DB_PORT') || '3306', 10),
+      port: parseInt(getEnv('DB_PORT') || (isProduction ? '5432' : '3306'), 10),
       username: getEnv('DB_USERNAME'),
       password: getEnv('DB_PASSWORD'),
       database: getEnv('DB_NAME'),
@@ -55,10 +55,10 @@ function getEnv(key: string, defaultValue?: string): string {
         AsignacionElemento,
         Novedad,
       ],
-      synchronize: true, // siempre sincronizar en desarrollo
-      logging: true, // siempre loggear en desarrollo
-      dropSchema: false, // no eliminar esquema existente
-    }),
+      synchronize: true,
+      logging: true,
+      dropSchema: false,
+    } as any),
 
     AsignacionElementoModule,
     UsuarioModule,
