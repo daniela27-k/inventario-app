@@ -1,5 +1,0 @@
-onlyBuiltDependencies:
-  - '@nestjs/core'
-  - bcrypt
-  - sqlite3
-  - unrs-resolver
