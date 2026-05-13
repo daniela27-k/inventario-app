@@ -46,6 +46,7 @@ const isProduction = process.env.NODE_ENV === 'production';
       username: getEnv('DB_USERNAME'),
       password: getEnv('DB_PASSWORD'),
       database: getEnv('DB_NAME'),
+      ssl: isProduction ? { rejectUnauthorized: false } : false,
       entities: [
         Ambiente,
         Usuario,
