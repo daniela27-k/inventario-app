@@ -1,4 +1,3 @@
-// src/auth/auth.controller.ts
 import {
   Controller,
   Post,
@@ -19,6 +18,8 @@ import { UpdateUsuarioDto } from '../usuario/dto/update-usuario.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { UsuarioService } from '../usuario/usuario.service';
 
+const isProduction = process.env.NODE_ENV === 'production';
+
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -37,13 +38,13 @@ export class AuthController {
 
     res.cookie('access_token', access_token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
       path: '/',
       maxAge: 3600000,
     });
 
-    return { usuario };
+    return { usuario, access_token };
   }
 
   @Post('login')
@@ -52,18 +53,17 @@ export class AuthController {
     @Body() loginUsuarioDto: LoginUsuarioDto,
     @Res({ passthrough: true }) res: Response,
   ) {
-    console.log(loginUsuarioDto)
     const { access_token, usuario } = await this.authService.login(loginUsuarioDto);
 
     res.cookie('access_token', access_token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
       path: '/',
       maxAge: 3600000,
     });
 
-    return { usuario };
+    return { usuario, access_token };
   }
 
   @Post('logout')
@@ -71,8 +71,8 @@ export class AuthController {
   logout(@Res({ passthrough: true }) res: Response) {
     res.clearCookie('access_token', {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
       path: '/',
     });
     return { message: 'Sesión cerrada correctamente' };
@@ -84,7 +84,6 @@ export class AuthController {
     return req.user;
   }
 
-  // ✅ Cualquier usuario autenticado puede actualizar su propio perfil
   @UseGuards(JwtAuthGuard)
   @Patch('profile')
   @HttpCode(HttpStatus.OK)
@@ -93,19 +92,10 @@ export class AuthController {
     @Body() updateUsuarioDto: UpdateUsuarioDto,
   ) {
     const userId = req.user?.id;
-    // Prevenir que el usuario cambie su propio rol o estado
     delete updateUsuarioDto.rol_usuario;
     delete updateUsuarioDto.estado_usuario;
     const updated = await this.usuarioService.update(userId, updateUsuarioDto);
     const { password: _, ...result } = updated as any;
     return result;
   }
-}
-
-interface User {
-  id: number;
-  email: string;
-  nombre_completo: string;
-  rol_usuario: string;
-  estado_usuario: string;
 }
