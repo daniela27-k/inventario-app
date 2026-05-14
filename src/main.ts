@@ -15,10 +15,18 @@ async function bootstrap() {
     }),
   );
 
+  // ✅ CORS: soporta múltiples orígenes separados por coma en producción
+  const rawOrigin = process.env.CORS_ORIGIN || '';
+  const allowedOrigins = rawOrigin
+    ? rawOrigin.split(',').map((o) => o.trim()).filter(Boolean)
+    : [];
+
   app.enableCors({
     origin:
       process.env.NODE_ENV === 'production'
-        ? process.env.CORS_ORIGIN || '*'
+        ? allowedOrigins.length > 0
+          ? allowedOrigins
+          : true  // ← permite cualquier origen si no se configura CORS_ORIGIN
         : [
             'http://localhost:3000',
             'http://localhost:3001',

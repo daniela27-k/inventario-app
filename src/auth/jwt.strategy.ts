@@ -37,10 +37,14 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     if (!usuario) {
       throw new UnauthorizedException('Token inválido: usuario no encontrado');
     }
+    // ✅ Nombres de campo alineados con ProfileResponse del frontend
     return {
       id: usuario.id,
-      username: usuario.email,
-      rolUsuario: usuario.rol_usuario,
+      email: usuario.email,
+      nombre_completo: usuario.nombre_completo,
+      telefono: usuario.telefono,
+      rol_usuario: usuario.rol_usuario,
+      estado_usuario: usuario.estado_usuario,
     };
   }
 }
