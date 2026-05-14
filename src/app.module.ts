@@ -40,12 +40,13 @@ const isProduction = process.env.NODE_ENV === 'production';
     }),
 
     TypeOrmModule.forRoot({
-      type: isProduction ? 'postgres' : 'mysql',
+      type: 'mysql', // ✅ Siempre MySQL: tanto local (XAMPP) como producción (Aiven)
       host: getEnv('DB_HOST'),
-      port: parseInt(getEnv('DB_PORT') || (isProduction ? '5432' : '3306'), 10),
+      port: parseInt(getEnv('DB_PORT') || '3306', 10),
       username: getEnv('DB_USERNAME'),
       password: getEnv('DB_PASSWORD'),
       database: getEnv('DB_NAME'),
+      // ✅ SSL requerido por Aiven en producción
       ssl: isProduction ? { rejectUnauthorized: false } : false,
       entities: [
         Ambiente,
@@ -56,8 +57,8 @@ const isProduction = process.env.NODE_ENV === 'production';
         AsignacionElemento,
         Novedad,
       ],
-      synchronize: true,
-      logging: true,
+      synchronize: true,          // ✅ Crea tablas automáticamente (BD de Aiven está vacía)
+      logging: !isProduction,     // ✅ Logs SQL solo en desarrollo, no en producción
       dropSchema: false,
     } as any),
 
